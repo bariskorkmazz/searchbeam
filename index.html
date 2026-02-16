@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SearchBeam — SEO & AI Search Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #12121f;
+    --surface: #1a1a2e;
+    --surface2: #21213a;
+    --border: #2a2a45;
+    --accent: #7c6dff;
+    --accent-bright: #a594ff;
+    --accent2: #5de4c7;
+    --accent-glow: rgba(124, 109, 255, 0.18);
+    --text: #e8e8f2;
+    --muted: #6b6b90;
+    --tag-bg: #1e1e34;
+    --radius-card: 16px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,109,255,0.08) 0%, transparent 70%);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2.5rem;
+    position: sticky;
+    top: 0;
+    background: rgba(18, 18, 31, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    gap: 1rem;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .logo-beam {
+    color: var(--accent-bright);
+    position: relative;
+  }
+
+  .logo-beam::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    border-radius: 2px;
+  }
+
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 400;
+    margin-top: 3px;
+  }
+
+  .logo-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--accent2);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  /* Language Toggle */
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .lang-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.65rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .lang-btn:hover { color: var(--text); }
+
+  .lang-btn.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .lang-divider {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+  }
+
+  nav {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  nav button {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  nav button:hover { color: var(--text); border-color: var(--border); }
+  nav button.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    font-weight: 500;
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+
+  .ticker-wrap {
+    background: linear-gradient(90deg, #3730a3, #5b21b6, #4338ca);
+    padding: 0.45rem 0;
+    overflow: hidden;
+  }
+
+  .ticker {
+    display: flex;
+    gap: 4rem;
+    animation: ticker 40s linear infinite;
+    white-space: nowrap;
+    width: max-content;
+  }
+
+  .ticker-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.88);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .ticker-item::before { content: '◆'; font-size: 0.5rem; }
+
+  @keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2.5rem 2.5rem;
+  }
+
+  .sources {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .sources-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 0.5rem;
+  }
+
+  .source-chip {
+    border: 1px solid var(--border);
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    letter-spacing: 0.04em;
+  }
+
+  .source-chip:hover, .source-chip.active {
+    border-color: var(--accent);
+    color: var(--accent-bright);
+    background: rgba(124,109,255,0.08);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 12px;
+    background: transparent;
+    border-radius: var(--radius-card);
+    overflow: visible;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 1.75rem;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--border);
+  }
+
+  .card:hover {
+    background: var(--surface2);
+    border-color: rgba(124,109,255,0.3);
+    box-shadow: 0 0 30px rgba(124,109,255,0.08);
+    transform: translateY(-1px);
+  }
+  .card:hover .card-arrow { transform: translate(3px, -3px); opacity: 1; }
+
+  .card.featured { grid-column: span 6; grid-row: span 2; padding: 2.25rem; }
+  .card.medium { grid-column: span 6; }
+  .card.small { grid-column: span 4; }
+
+  .card-source {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .source-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .source-sej { color: #4a9eff; } .source-sej .source-dot { background: #4a9eff; }
+  .source-ser { color: #ff6b6b; } .source-ser .source-dot { background: #ff6b6b; }
+  .source-sel { color: #ffd93d; } .source-sel .source-dot { background: #ffd93d; }
+  .source-hn  { color: #ff6600; } .source-hn  .source-dot { background: #ff6600; }
+  .source-google { color: #34a853; } .source-google .source-dot { background: #34a853; }
+  .source-anthropic { color: #d97706; } .source-anthropic .source-dot { background: #d97706; }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+  }
+
+  .card.featured .card-title { font-size: 1.5rem; margin-bottom: 1rem; }
+  .card.medium .card-title { font-size: 1rem; }
+  .card.small .card-title { font-size: 0.85rem; }
+
+  .card-excerpt {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+  }
+
+  .card-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .card-arrow {
+    width: 20px;
+    height: 20px;
+    opacity: 0.25;
+    transition: all 0.2s;
+    color: var(--accent-bright);
+    font-size: 1rem;
+  }
+
+  .card-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .tag.geo { border-color: rgba(93,228,199,0.25); color: var(--accent2); background: rgba(93,228,199,0.05); }
+  .tag.ai  { border-color: rgba(124,109,255,0.3); color: var(--accent-bright); background: rgba(124,109,255,0.08); }
+  .tag.seo { border-color: rgba(74,158,255,0.25); color: #7ab8ff; background: rgba(74,158,255,0.05); }
+  .tag.ppc { border-color: rgba(249,115,22,0.3); color: #fb923c; background: rgba(249,115,22,0.06); }
+
+  .source-ppchero { color: #f97316; }
+  .source-ppchero .source-dot { background: #f97316; }
+
+  .loading-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 12px;
+    background: transparent;
+  }
+
+  .skeleton {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.75rem;
+    border-radius: var(--radius-card);
+  }
+  .skeleton.featured { grid-column: span 6; grid-row: span 2; }
+  .skeleton.medium { grid-column: span 6; }
+  .skeleton.small { grid-column: span 4; }
+
+  .skel-line {
+    height: 12px;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .skel-line.short { width: 40%; }
+  .skel-line.medium-w { width: 70%; }
+  .skel-line.full { width: 100%; }
+  .skel-line.tall { height: 20px; }
+
+  @keyframes shimmer {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+  }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    background: transparent;
+    margin-bottom: 2rem;
+  }
+
+  .stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    border-radius: var(--radius-card);
+    transition: border-color 0.2s;
+  }
+
+  .stat:hover { border-color: rgba(124,109,255,0.3); }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .error-box { background: var(--surface); border: 1px solid #333; border-radius: 8px; padding: 3rem; text-align: center; }
+  .error-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .error-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .error-msg { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+
+  footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; margin-top: 4rem; }
+  .footer-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+  .footer-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.06em; }
+  .footer-text a { color: var(--accent-bright); text-decoration: none; }
+
+  .coffee-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .coffee-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #2d2b55, #3d3a70);
+    border: 1px solid rgba(124,109,255,0.4);
+    color: var(--text);
+    text-decoration: none;
+    padding: 0.6rem 1.4rem;
+    border-radius: 100px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(124,109,255,0.1);
+  }
+
+  .coffee-btn:hover {
+    background: linear-gradient(135deg, #3d3a70, #4e4a90);
+    border-color: rgba(165,148,255,0.6);
+    box-shadow: 0 0 28px rgba(124,109,255,0.2);
+    transform: translateY(-1px);
+  }
+
+  .coffee-icon { font-size: 1rem; }
+
+  .coffee-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title::before { content: ''; width: 20px; height: 1px; background: var(--muted); display: inline-block; }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent-bright); background: rgba(124,109,255,0.06); }
+  .refresh-btn.spinning svg { animation: spin 1s linear infinite; }
+
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  @media (max-width: 768px) {
+    .card.featured, .card.medium, .card.small { grid-column: span 12; }
+    .stat { padding: 1rem 1.25rem; }
+    .stat-value { font-size: 1.5rem; }
+    nav { display: none; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+    .header-inner { gap: 0.5rem; }
+    main { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Ticker -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker-track">
+    <span class="ticker-item" data-i18n="ticker1">Google AI Overviews expanding to new markets</span>
+    <span class="ticker-item" data-i18n="ticker2">Anthropic releases new models with extended thinking</span>
+    <span class="ticker-item" data-i18n="ticker3">Search Engine Journal: GEO becomes standard practice</span>
+    <span class="ticker-item" data-i18n="ticker4">Perplexity AI now processing 100M+ queries daily</span>
+    <span class="ticker-item" data-i18n="ticker5">Google Search Console adds AI traffic segment</span>
+    <span class="ticker-item" data-i18n="ticker6">SEO teams worldwide adding GEO to service offerings</span>
+    <span class="ticker-item" data-i18n="ticker1">Google AI Overviews expanding to new markets</span>
+    <span class="ticker-item" data-i18n="ticker2">Anthropic releases new models with extended thinking</span>
+    <span class="ticker-item" data-i18n="ticker3">Search Engine Journal: GEO becomes standard practice</span>
+    <span class="ticker-item" data-i18n="ticker4">Perplexity AI now processing 100M+ queries daily</span>
+    <span class="ticker-item" data-i18n="ticker5">Google Search Console adds AI traffic segment</span>
+    <span class="ticker-item" data-i18n="ticker6">SEO teams worldwide adding GEO to service offerings</span>
+  </div>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo">
+      <div class="logo-wrap">
+        <div>Search<span class="logo-beam">Beam</span></div>
+        <div class="logo-sub" data-i18n="logo-sub">SEO & AI Search Intelligence</div>
+      </div>
+    </a>
+
+    <nav id="filter-nav">
+      <button class="active" data-filter="all" data-i18n="nav-all">All</button>
+      <button data-filter="seo" data-i18n="nav-seo">SEO</button>
+      <button data-filter="geo" data-i18n="nav-geo">GEO</button>
+      <button data-filter="ai" data-i18n="nav-ai">AI Search</button>
+      <button data-filter="ppc" data-i18n="nav-ppc">PPC</button>
+      <button data-filter="google" data-i18n="nav-google">Google</button>
+    </nav>
+
+    <div class="header-right">
+      <!-- Language Toggle -->
+      <div class="lang-toggle">
+        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+        <div class="lang-divider"></div>
+        <button class="lang-btn" id="btn-tr" onclick="setLang('tr')">🇹🇷 TR</button>
+      </div>
+
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        <span data-i18n="live">LIVE</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-value" id="stat-articles">—</div>
+      <div class="stat-label" data-i18n="stat-articles">Articles Today</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-sources">7</div>
+      <div class="stat-label" data-i18n="stat-sources">Active Sources</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-geo">—</div>
+      <div class="stat-label" data-i18n="stat-geo">GEO Articles</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-updated">—</div>
+      <div class="stat-label" data-i18n="stat-updated">Last Updated</div>
+    </div>
+  </div>
+
+  <!-- Section header -->
+  <div class="section-header">
+    <div class="section-title" data-i18n="section-title">Latest Intelligence</div>
+    <button class="refresh-btn" id="refresh-btn" onclick="loadFeeds()">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 4 23 10 17 10"></polyline>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      </svg>
+      <span data-i18n="refresh">REFRESH</span>
+    </button>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources">
+    <span class="sources-label" data-i18n="sources-label">Sources:</span>
+    <span class="source-chip active" data-src="all" data-i18n="src-all">All Sources</span>
+    <span class="source-chip" data-src="sej">Search Engine Journal</span>
+    <span class="source-chip" data-src="ser">SE Roundtable</span>
+    <span class="source-chip" data-src="sel">Search Engine Land</span>
+    <span class="source-chip" data-src="ppchero">PPC Hero</span>
+    <span class="source-chip" data-src="hn">Hacker News</span>
+    <span class="source-chip" data-src="google">Google Blog</span>
+    <span class="source-chip" data-src="anthropic">Anthropic</span>
+  </div>
+
+  <!-- Feed -->
+  <div id="feed-container">
+    <div class="loading-grid" id="skeleton">
+      <div class="skeleton featured">
+        <div class="skel-line short"></div><div class="skel-line tall medium-w"></div>
+        <div class="skel-line tall short"></div><div class="skel-line full"></div>
+        <div class="skel-line full"></div><div class="skel-line medium-w"></div>
+      </div>
+      <div class="skeleton medium"><div class="skel-line short"></div><div class="skel-line tall medium-w"></div><div class="skel-line full"></div></div>
+      <div class="skeleton medium"><div class="skel-line short"></div><div class="skel-line tall medium-w"></div><div class="skel-line full"></div></div>
+      <div class="skeleton small"><div class="skel-line short"></div><div class="skel-line tall full"></div></div>
+      <div class="skeleton small"><div class="skel-line short"></div><div class="skel-line tall full"></div></div>
+      <div class="skeleton small"><div class="skel-line short"></div><div class="skel-line tall full"></div></div>
+    </div>
+    <div class="grid" id="articles-grid" style="display:none;"></div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-text" data-i18n="footer-left">SearchBeam.co — SEO & AI Search Intelligence</div>
+
+    <div class="coffee-wrap">
+      <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="coffee-btn">
+        <span class="coffee-icon">☕</span>
+        <span class="coffee-text" data-i18n="coffee-text">Buy me a coffee</span>
+      </a>
+      <div class="coffee-sub" data-i18n="coffee-sub">If SearchBeam saves you time, a coffee means a lot ✌️</div>
+    </div>
+
+    <div class="footer-text"><span data-i18n="footer-right">Built for the SEO community</span> · <a href="#" data-i18n="footer-submit">Submit a Source</a></div>
+  </div>
+</footer>
+
+<script>
+// ─── i18n Translations ───────────────────────────────────────────────
+const TRANSLATIONS = {
+  en: {
+    'logo-sub':       'SEO & AI Search Intelligence',
+    'nav-all':        'All',
+    'nav-seo':        'SEO',
+    'nav-geo':        'GEO',
+    'nav-ai':         'AI Search',
+    'nav-ppc':        'PPC',
+    'nav-google':     'Google',
+    'live':           'LIVE',
+    'stat-articles':  'Articles Today',
+    'stat-sources':   'Active Sources',
+    'stat-geo':       'GEO Articles',
+    'stat-updated':   'Last Updated',
+    'section-title':  'Latest Intelligence',
+    'refresh':        'REFRESH',
+    'sources-label':  'Sources:',
+    'src-all':        'All Sources',
+    'footer-left':    'SearchBeam.co — SEO & AI Search Intelligence',
+    'footer-right':   'Built for the SEO community',
+    'footer-submit':  'Submit a Source',
+    'coffee-text':    'Buy me a coffee',
+    'coffee-sub':     'If SearchBeam saves you time, a coffee means a lot ✌️',
+    'ticker1': 'Google AI Overviews expanding to new markets',
+    'ticker2': 'Anthropic releases new models with extended thinking',
+    'ticker3': 'Search Engine Journal: GEO becomes standard practice',
+    'ticker4': 'Perplexity AI now processing 100M+ queries daily',
+    'ticker5': 'Google Search Console adds AI traffic segment',
+    'ticker6': 'SEO teams worldwide adding GEO to service offerings',
+    'no-articles':    'NO ARTICLES FOUND FOR THIS FILTER',
+    'error-title':    'Unable to fetch live feeds',
+    'error-msg':      'This may be due to network restrictions in this preview environment. The RSS feeds will work when hosted on a web server.',
+    'time-just-now':  'just now',
+    'time-ago':       'ago',
+  },
+  tr: {
+    'logo-sub':       'SEO & Yapay Zeka Arama İstihbaratı',
+    'nav-all':        'Tümü',
+    'nav-seo':        'SEO',
+    'nav-geo':        'GEO',
+    'nav-ai':         'YZ Arama',
+    'nav-ppc':        'PPC',
+    'nav-google':     'Google',
+    'live':           'CANLI',
+    'stat-articles':  'Bugünkü Makaleler',
+    'stat-sources':   'Aktif Kaynak',
+    'stat-geo':       'GEO Makaleleri',
+    'stat-updated':   'Son Güncelleme',
+    'section-title':  'Son Haberler',
+    'refresh':        'YENİLE',
+    'sources-label':  'Kaynaklar:',
+    'src-all':        'Tüm Kaynaklar',
+    'footer-left':    'SearchBeam.co — SEO & YZ Arama İstihbaratı',
+    'footer-right':   'SEO camiası için yapıldı',
+    'footer-submit':  'Kaynak Öner',
+    'coffee-text':    'Bir kahve ısmarla',
+    'coffee-sub':     'SearchBeam işine yarıyorsa, bir kahve çok şey ifade eder ✌️',
+    'ticker1': 'Google AI Overviews yeni pazarlara genişliyor',
+    'ticker2': 'Anthropic, gelişmiş düşünme özelliğiyle yeni modeller yayınladı',
+    'ticker3': 'Search Engine Journal: GEO artık standart bir uygulama',
+    'ticker4': 'Perplexity AI günlük 100M+ sorgu işliyor',
+    'ticker5': 'Google Search Console yapay zeka trafik segmenti ekledi',
+    'ticker6': 'Dünya genelinde SEO ekipleri GEO hizmetini sunmaya başladı',
+    'no-articles':    'BU FİLTRE İÇİN MAKALE BULUNAMADI',
+    'error-title':    'Canlı akışlar yüklenemedi',
+    'error-msg':      'Bu durum önizleme ortamındaki ağ kısıtlamalarından kaynaklanıyor olabilir. RSS akışları gerçek bir sunucuda barındırıldığında düzgün çalışacaktır.',
+    'time-just-now':  'az önce',
+    'time-ago':       'önce',
+  }
+};
+
+let currentLang = 'en';
+
+function t(key) {
+  return TRANSLATIONS[currentLang][key] || TRANSLATIONS['en'][key] || key;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+  document.getElementById('html-root').lang = currentLang;
+  document.title = currentLang === 'tr'
+    ? 'SearchBeam — SEO & YZ Arama İstihbaratı'
+    : 'SearchBeam — SEO & AI Search Intelligence';
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+  applyTranslations();
+  renderGrid(); // re-render to update time strings & error messages
+}
+
+// ─── RSS Sources ──────────────────────────────────────────────────────
+const SOURCES = [
+  { id: 'sej',       name: 'Search Engine Journal', url: 'https://www.searchenginejournal.com/feed/', color: '#4a9eff', cls: 'source-sej', tags: ['seo'] },
+  { id: 'ser',       name: 'SE Roundtable',          url: 'https://www.seroundtable.com/arc/rss.xml',   color: '#ff6b6b', cls: 'source-ser', tags: ['seo','google'] },
+  { id: 'sel',       name: 'Search Engine Land',     url: 'https://searchengineland.com/feed',           color: '#ffd93d', cls: 'source-sel', tags: ['seo','geo'] },
+  { id: 'ppchero',   name: 'PPC Hero',               url: 'https://www.ppchero.com/feed/',              color: '#f97316', cls: 'source-ppchero', tags: ['ppc'] },
+  { id: 'hn',        name: 'Hacker News',             url: 'https://hnrss.org/frontpage',                color: '#ff6600', cls: 'source-hn',  tags: ['ai','tech'] },
+  { id: 'google',    name: 'Google Search Central',  url: 'https://developers.google.com/search/blog/rss.xml', color: '#34a853', cls: 'source-google', tags: ['google','seo'] },
+  { id: 'anthropic', name: 'Anthropic',              url: 'https://www.anthropic.com/rss.xml',           color: '#d97706', cls: 'source-anthropic', tags: ['ai','geo'] }
+];
+
+const PROXY = 'https://api.allorigins.win/get?url=';
+let allArticles = [];
+let activeFilter = 'all';
+let activeSource = 'all';
+
+function timeAgo(dateStr) {
+  const date = new Date(dateStr);
+  if (isNaN(date)) return t('time-just-now');
+  const diff = Math.floor((Date.now() - date) / 1000);
+  if (currentLang === 'tr') {
+    if (diff < 60) return `${diff} sn ${t('time-ago')}`;
+    if (diff < 3600) return `${Math.floor(diff/60)} dk ${t('time-ago')}`;
+    if (diff < 86400) return `${Math.floor(diff/3600)} sa ${t('time-ago')}`;
+    return `${Math.floor(diff/86400)} gün ${t('time-ago')}`;
+  } else {
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+    return `${Math.floor(diff/86400)}d ago`;
+  }
+}
+
+function detectTags(title) {
+  const tags = [];
+  const t2 = title.toLowerCase();
+  if (t2.includes('geo') || t2.includes('generative') || t2.includes('ai overview') || t2.includes('answer engine')) tags.push('geo');
+  if (t2.includes('ai') || t2.includes('chatgpt') || t2.includes('gemini') || t2.includes('claude') || t2.includes('perplexity') || t2.includes('llm')) tags.push('ai');
+  if (t2.includes('seo') || t2.includes('search') || t2.includes('ranking') || t2.includes('keyword') || t2.includes('serp')) tags.push('seo');
+  if (t2.includes('ppc') || t2.includes('ads') || t2.includes('adwords') || t2.includes('paid') || t2.includes('cpc') || t2.includes('campaign') || t2.includes('bidding')) tags.push('ppc');
+  return [...new Set(tags)].slice(0, 3);
+}
+
+async function fetchRSS(source) {
+  try {
+    const url = PROXY + encodeURIComponent(source.url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const data = await res.json();
+    const xml = new DOMParser().parseFromString(data.contents, 'text/xml');
+    const items = xml.querySelectorAll('item');
+    return Array.from(items).slice(0, 8).map(item => ({
+      title: item.querySelector('title')?.textContent?.trim() || 'Untitled',
+      link: item.querySelector('link')?.textContent?.trim() || '#',
+      pubDate: item.querySelector('pubDate')?.textContent || new Date().toISOString(),
+      description: item.querySelector('description')?.textContent?.replace(/<[^>]*>/g, '').trim().slice(0, 120) || '',
+      source, tags: detectTags(item.querySelector('title')?.textContent || ''),
+      timestamp: new Date(item.querySelector('pubDate')?.textContent || Date.now())
+    }));
+  } catch(e) {
+    console.warn(`Failed: ${source.name}`, e.message);
+    return [];
+  }
+}
+
+function getCardClass(i) {
+  if (i === 0) return 'featured';
+  if (i < 3)  return 'medium';
+  return 'small';
+}
+
+function renderCard(article, index) {
+  const cls = getCardClass(index);
+  const tags = article.tags.map(tag => `<span class="tag ${tag}">${tag.toUpperCase()}</span>`).join('');
+  const excerpt = cls === 'featured' && article.description
+    ? `<div class="card-excerpt">${article.description}...</div>` : '';
+  return `
+    <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="card ${cls}">
+      <div class="card-source ${article.source.cls}">
+        <div class="source-dot"></div>
+        ${article.source.name.toUpperCase()}
+      </div>
+      ${tags ? `<div class="card-tags">${tags}</div>` : ''}
+      <div class="card-title">${article.title}</div>
+      ${excerpt}
+      <div class="card-footer">
+        <span class="card-time">${timeAgo(article.pubDate)}</span>
+        <span class="card-arrow">↗</span>
+      </div>
+    </a>`;
+}
+
+function filterArticles() {
+  return allArticles.filter(a => {
+    const srcMatch = activeSource === 'all' || a.source.id === activeSource;
+    const filterMatch = activeFilter === 'all' || a.tags.includes(activeFilter);
+    return srcMatch && filterMatch;
+  });
+}
+
+function renderGrid() {
+  const filtered = filterArticles();
+  const grid = document.getElementById('articles-grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div style="grid-column:span 12;padding:3rem;text-align:center;color:var(--muted);">
+      <div style="font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;">${t('no-articles')}</div>
+    </div>`;
+  } else {
+    grid.innerHTML = filtered.slice(0, 11).map((a, i) => renderCard(a, i)).join('');
+  }
+}
+
+function updateStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayCount = allArticles.filter(a => a.timestamp >= today).length;
+  const geoCount = allArticles.filter(a => a.tags.includes('geo')).length;
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  document.getElementById('stat-articles').textContent = todayCount || allArticles.length;
+  document.getElementById('stat-geo').textContent = geoCount;
+  document.getElementById('stat-updated').textContent = timeStr;
+}
+
+async function loadFeeds() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  document.getElementById('skeleton').style.display = '';
+  document.getElementById('articles-grid').style.display = 'none';
+
+  const results = await Promise.allSettled(SOURCES.map(s => fetchRSS(s)));
+  allArticles = [];
+  results.forEach(r => { if (r.status === 'fulfilled') allArticles.push(...r.value); });
+  allArticles.sort((a, b) => b.timestamp - a.timestamp);
+
+  document.getElementById('skeleton').style.display = 'none';
+  document.getElementById('articles-grid').style.display = '';
+
+  if (allArticles.length === 0) {
+    document.getElementById('articles-grid').innerHTML = `
+      <div style="grid-column:span 12;">
+        <div class="error-box">
+          <div class="error-icon">📡</div>
+          <div class="error-title">${t('error-title')}</div>
+          <div class="error-msg">${t('error-msg')}</div>
+        </div>
+      </div>`;
+  } else {
+    renderGrid();
+    updateStats();
+  }
+  btn.classList.remove('spinning');
+}
+
+// Filter nav
+document.getElementById('filter-nav').addEventListener('click', e => {
+  if (e.target.tagName === 'BUTTON') {
+    document.querySelectorAll('#filter-nav button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    activeFilter = e.target.dataset.filter;
+    renderGrid();
+  }
+});
+
+// Source chips
+document.querySelectorAll('.source-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.source-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    activeSource = chip.dataset.src;
+    renderGrid();
+  });
+});
+
+// Init
+loadFeeds();
+setInterval(loadFeeds, 10 * 60 * 1000);
+</script>
+</body>
+</html>
