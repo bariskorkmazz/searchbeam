@@ -4,21 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SearchBeam — SEO & AI Search Intelligence</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%233b82f6'/%3E%3Cstop offset='100%25' style='stop-color:%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='20' fill='%231e2836'/%3E%3Ctext x='50' y='70' font-family='system-ui, -apple-system, sans-serif' font-size='52' font-weight='800' text-anchor='middle' fill='url(%23g)'%3ESB%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #12121f;
-    --surface: #1a1a2e;
-    --surface2: #21213a;
-    --border: #2a2a45;
-    --accent: #7c6dff;
-    --accent-bright: #a594ff;
-    --accent2: #5de4c7;
-    --accent-glow: rgba(124, 109, 255, 0.18);
-    --text: #e8e8f2;
-    --muted: #6b6b90;
-    --tag-bg: #1e1e34;
-    --radius-card: 16px;
+    --bg: #0f1419;
+    --bg-lighter: #151b23;
+    --surface: #1e2836;
+    --surface2: #2a3649;
+    --surface-hover: #344152;
+    --border: #3a4a5f;
+    --border-subtle: #2d3b4e;
+    --accent: #3b82f6;
+    --accent-bright: #60a5fa;
+    --accent2: #06b6d4;
+    --accent-warm: #f59e0b;
+    --accent-glow: rgba(59, 130, 246, 0.15);
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --text-subtle: #64748b;
+    --tag-bg: #1e293b;
+    --radius-card: 12px;
     --radius-sm: 8px;
   }
 
@@ -26,7 +32,9 @@
 
   body {
     background: var(--bg);
-    background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,109,255,0.08) 0%, transparent 70%);
+    background-image: 
+      radial-gradient(ellipse 100% 60% at 50% -20%, rgba(59,130,246,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse 80% 50% at 80% 100%, rgba(6,182,212,0.04) 0%, transparent 50%);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     min-height: 100vh;
@@ -44,14 +52,15 @@
   }
 
   header {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border-subtle);
     padding: 0 2.5rem;
     position: sticky;
     top: 0;
-    background: rgba(18, 18, 31, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(15, 20, 25, 0.7);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     z-index: 100;
+    box-shadow: 0 1px 0 0 rgba(59,130,246,0.1);
   }
 
   .header-inner {
@@ -60,7 +69,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 60px;
+    height: 64px;
     gap: 1rem;
   }
 
@@ -73,12 +82,20 @@
     color: var(--text);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     flex-shrink: 0;
   }
 
+  .logo-icon {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 8px rgba(59,130,246,0.3));
+  }
+
   .logo-beam {
-    color: var(--accent-bright);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     position: relative;
   }
 
@@ -89,14 +106,14 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
+    background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
     border-radius: 2px;
   }
 
   .logo-sub {
     font-family: 'DM Mono', monospace;
     font-size: 0.58rem;
-    color: var(--muted);
+    color: var(--text-muted);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     font-weight: 400;
@@ -154,58 +171,64 @@
   .lang-btn {
     background: none;
     border: none;
-    color: var(--muted);
+    color: var(--text-muted);
     font-family: 'DM Mono', monospace;
     font-size: 0.65rem;
     letter-spacing: 0.08em;
     padding: 0.35rem 0.65rem;
     cursor: pointer;
-    transition: all 0.15s;
+    transition: all 0.2s;
     display: flex;
     align-items: center;
     gap: 0.3rem;
   }
 
-  .lang-btn:hover { color: var(--text); }
+  .lang-btn:hover { color: var(--text); background: rgba(59,130,246,0.05); }
 
   .lang-btn.active {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent-bright));
     color: #fff;
     font-weight: 500;
+    box-shadow: 0 0 12px rgba(59,130,246,0.3);
   }
 
   .lang-divider {
     width: 1px;
     height: 20px;
-    background: var(--border);
+    background: var(--border-subtle);
   }
 
   nav {
     display: flex;
-    gap: 0.25rem;
+    gap: 0.5rem;
   }
 
   nav button {
     background: none;
     border: 1px solid transparent;
-    color: var(--muted);
+    color: var(--text-muted);
     font-family: 'DM Mono', monospace;
     font-size: 0.7rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
   }
 
-  nav button:hover { color: var(--text); border-color: var(--border); }
+  nav button:hover {
+    color: var(--text);
+    background: var(--surface);
+    border-color: var(--border-subtle);
+  }
+  
   nav button.active {
-    background: var(--accent);
+    background: linear-gradient(135deg, var(--accent), var(--accent-bright));
     color: #fff;
-    border-color: var(--accent);
+    border-color: transparent;
     font-weight: 500;
-    box-shadow: 0 0 16px var(--accent-glow);
+    box-shadow: 0 4px 20px var(--accent-glow), 0 0 0 1px rgba(59,130,246,0.2);
   }
 
   .ticker-wrap {
@@ -264,12 +287,12 @@
   }
 
   .source-chip {
-    border: 1px solid var(--border);
-    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--border-subtle);
+    padding: 0.4rem 0.9rem;
     border-radius: 100px;
     font-family: 'DM Mono', monospace;
     font-size: 0.65rem;
-    color: var(--muted);
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
     background: var(--surface);
@@ -279,13 +302,14 @@
   .source-chip:hover, .source-chip.active {
     border-color: var(--accent);
     color: var(--accent-bright);
-    background: rgba(124,109,255,0.08);
+    background: rgba(59,130,246,0.1);
+    box-shadow: 0 0 16px rgba(59,130,246,0.15);
   }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: 12px;
+    gap: 16px;
     background: transparent;
     border-radius: var(--radius-card);
     overflow: visible;
@@ -294,23 +318,26 @@
   .card {
     background: var(--surface);
     padding: 1.75rem;
-    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
     text-decoration: none;
     color: inherit;
     display: block;
     border-radius: var(--radius-card);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-subtle);
   }
 
   .card:hover {
-    background: var(--surface2);
-    border-color: rgba(124,109,255,0.3);
-    box-shadow: 0 0 30px rgba(124,109,255,0.08);
-    transform: translateY(-1px);
+    background: var(--surface-hover);
+    border-color: rgba(59,130,246,0.4);
+    box-shadow: 
+      0 8px 32px rgba(0,0,0,0.2),
+      0 0 0 1px rgba(59,130,246,0.1),
+      0 0 24px rgba(59,130,246,0.1);
+    transform: translateY(-2px);
   }
-  .card:hover .card-arrow { transform: translate(3px, -3px); opacity: 1; }
+  .card:hover .card-arrow { transform: translate(4px, -4px); opacity: 1; }
 
   .card.featured { grid-column: span 6; grid-row: span 2; padding: 2.25rem; }
   .card.medium { grid-column: span 6; }
@@ -328,18 +355,20 @@
   }
 
   .source-dot { width: 6px; height: 6px; border-radius: 50%; }
-  .source-sej { color: #4a9eff; } .source-sej .source-dot { background: #4a9eff; }
-  .source-ser { color: #ff6b6b; } .source-ser .source-dot { background: #ff6b6b; }
-  .source-sel { color: #ffd93d; } .source-sel .source-dot { background: #ffd93d; }
-  .source-hn  { color: #ff6600; } .source-hn  .source-dot { background: #ff6600; }
-  .source-google { color: #34a853; } .source-google .source-dot { background: #34a853; }
-  .source-anthropic { color: #d97706; } .source-anthropic .source-dot { background: #d97706; }
+  .source-sej { color: #3b82f6; } .source-sej .source-dot { background: #3b82f6; }
+  .source-ser { color: #ef4444; } .source-ser .source-dot { background: #ef4444; }
+  .source-sel { color: #eab308; } .source-sel .source-dot { background: #eab308; }
+  .source-ppchero { color: #f59e0b; } .source-ppchero .source-dot { background: #f59e0b; }
+  .source-hn  { color: #f97316; } .source-hn  .source-dot { background: #f97316; }
+  .source-google { color: #22c55e; } .source-google .source-dot { background: #22c55e; }
+  .source-anthropic { color: #a855f7; } .source-anthropic .source-dot { background: #a855f7; }
 
   .card-title {
     font-family: 'Syne', sans-serif;
     font-weight: 700;
     line-height: 1.25;
     margin-bottom: 0.75rem;
+    color: var(--text);
   }
 
   .card.featured .card-title { font-size: 1.5rem; margin-bottom: 1rem; }
@@ -348,7 +377,7 @@
 
   .card-excerpt {
     font-size: 0.85rem;
-    color: var(--muted);
+    color: var(--text-muted);
     line-height: 1.6;
     margin-bottom: 1rem;
   }
@@ -363,15 +392,15 @@
   .card-time {
     font-family: 'DM Mono', monospace;
     font-size: 0.6rem;
-    color: var(--muted);
+    color: var(--text-subtle);
     letter-spacing: 0.04em;
   }
 
   .card-arrow {
     width: 20px;
     height: 20px;
-    opacity: 0.25;
-    transition: all 0.2s;
+    opacity: 0.3;
+    transition: all 0.3s;
     color: var(--accent-bright);
     font-size: 1rem;
   }
@@ -380,34 +409,31 @@
 
   .tag {
     background: var(--tag-bg);
-    border: 1px solid var(--border);
-    padding: 0.2rem 0.5rem;
-    border-radius: 3px;
+    border: 1px solid var(--border-subtle);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
     font-family: 'DM Mono', monospace;
     font-size: 0.58rem;
-    color: var(--muted);
+    color: var(--text-muted);
     letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  .tag.geo { border-color: rgba(93,228,199,0.25); color: var(--accent2); background: rgba(93,228,199,0.05); }
-  .tag.ai  { border-color: rgba(124,109,255,0.3); color: var(--accent-bright); background: rgba(124,109,255,0.08); }
-  .tag.seo { border-color: rgba(74,158,255,0.25); color: #7ab8ff; background: rgba(74,158,255,0.05); }
-  .tag.ppc { border-color: rgba(249,115,22,0.3); color: #fb923c; background: rgba(249,115,22,0.06); }
-
-  .source-ppchero { color: #f97316; }
-  .source-ppchero .source-dot { background: #f97316; }
+  .tag.geo { border-color: rgba(6,182,212,0.3); color: var(--accent2); background: rgba(6,182,212,0.08); }
+  .tag.ai  { border-color: rgba(59,130,246,0.3); color: var(--accent-bright); background: rgba(59,130,246,0.08); }
+  .tag.seo { border-color: rgba(96,165,250,0.3); color: #93c5fd; background: rgba(96,165,250,0.08); }
+  .tag.ppc { border-color: rgba(245,158,11,0.3); color: var(--accent-warm); background: rgba(245,158,11,0.08); }
 
   .loading-grid {
     display: grid;
     grid-template-columns: repeat(12, 1fr);
-    gap: 12px;
+    gap: 16px;
     background: transparent;
   }
 
   .skeleton {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-subtle);
     padding: 1.75rem;
     border-radius: var(--radius-card);
   }
@@ -418,7 +444,7 @@
   .skel-line {
     height: 12px;
     background: var(--surface2);
-    border-radius: 4px;
+    border-radius: 6px;
     margin-bottom: 0.75rem;
     animation: shimmer 1.5s ease-in-out infinite;
   }
@@ -429,8 +455,8 @@
   .skel-line.tall { height: 20px; }
 
   @keyframes shimmer {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
   }
 
   .stats-bar {
@@ -443,20 +469,23 @@
 
   .stat {
     background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 1.5rem;
+    border: 1px solid var(--border-subtle);
+    padding: 1.75rem;
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.5rem;
     border-radius: var(--radius-card);
-    transition: border-color 0.2s;
+    transition: all 0.3s;
   }
 
-  .stat:hover { border-color: rgba(124,109,255,0.3); }
+  .stat:hover {
+    border-color: rgba(59,130,246,0.4);
+    box-shadow: 0 0 24px rgba(59,130,246,0.08);
+  }
 
   .stat-value {
     font-family: 'Syne', sans-serif;
-    font-size: 1.9rem;
+    font-size: 2rem;
     font-weight: 800;
     background: linear-gradient(135deg, var(--accent-bright), var(--accent2));
     -webkit-background-clip: text;
@@ -464,56 +493,80 @@
     background-clip: text;
     line-height: 1;
   }
-  .stat-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    color: var(--text-subtle);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 
-  .error-box { background: var(--surface); border: 1px solid #333; border-radius: 8px; padding: 3rem; text-align: center; }
-  .error-icon { font-size: 2rem; margin-bottom: 1rem; }
-  .error-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
-  .error-msg { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+  .error-box {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    padding: 3rem;
+    text-align: center;
+  }
+  .error-icon { font-size: 2rem; margin-bottom: 1rem; opacity: 0.5; }
+  .error-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .error-msg { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
 
-  footer { border-top: 1px solid var(--border); padding: 2rem 2.5rem; margin-top: 4rem; }
+  footer {
+    border-top: 1px solid var(--border-subtle);
+    padding: 2.5rem 2.5rem;
+    margin-top: 5rem;
+    background: linear-gradient(180deg, transparent 0%, rgba(15,20,25,0.5) 100%);
+  }
   .footer-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
-  .footer-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.06em; }
-  .footer-text a { color: var(--accent-bright); text-decoration: none; }
+  .footer-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--text-subtle); letter-spacing: 0.06em; }
+  .footer-text a { color: var(--accent-bright); text-decoration: none; transition: color 0.2s; }
+  .footer-text a:hover { color: var(--accent2); }
 
   .coffee-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.5rem;
   }
 
   .coffee-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    background: linear-gradient(135deg, #2d2b55, #3d3a70);
-    border: 1px solid rgba(124,109,255,0.4);
-    color: var(--text);
+    gap: 0.6rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent-bright));
+    border: 1px solid rgba(59,130,246,0.3);
+    color: #fff;
     text-decoration: none;
-    padding: 0.6rem 1.4rem;
+    padding: 0.75rem 1.75rem;
     border-radius: 100px;
     font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
+    font-size: 0.85rem;
+    font-weight: 600;
     letter-spacing: 0.01em;
-    transition: all 0.2s;
-    box-shadow: 0 0 20px rgba(124,109,255,0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(59,130,246,0.2);
   }
 
   .coffee-btn:hover {
-    background: linear-gradient(135deg, #3d3a70, #4e4a90);
-    border-color: rgba(165,148,255,0.6);
-    box-shadow: 0 0 28px rgba(124,109,255,0.2);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, var(--accent-bright), var(--accent2));
+    border-color: rgba(6,182,212,0.4);
+    box-shadow: 0 8px 32px rgba(59,130,246,0.3);
+    transform: translateY(-2px);
   }
 
-  .coffee-icon { font-size: 1rem; }
+  .coffee-icon { font-size: 1.1rem; }
 
   .coffee-sub {
     font-family: 'DM Mono', monospace;
-    font-size: 0.58rem;
-    color: var(--muted);
+    font-size: 0.6rem;
+    color: var(--text-subtle);
     letter-spacing: 0.04em;
     text-align: center;
   }
@@ -590,6 +643,16 @@
 <header>
   <div class="header-inner">
     <a href="#" class="logo">
+      <svg class="logo-icon" width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#3b82f6"/>
+            <stop offset="100%" style="stop-color:#06b6d4"/>
+          </linearGradient>
+        </defs>
+        <rect width="100" height="100" rx="20" fill="url(#logo-gradient)" opacity="0.15"/>
+        <text x="50" y="70" font-family="system-ui, -apple-system, sans-serif" font-size="52" font-weight="800" text-anchor="middle" fill="url(#logo-gradient)">SB</text>
+      </svg>
       <div class="logo-wrap">
         <div>Search<span class="logo-beam">Beam</span></div>
         <div class="logo-sub" data-i18n="logo-sub">SEO & AI Search Intelligence</div>
@@ -690,11 +753,15 @@
     <div class="footer-text" data-i18n="footer-left">SearchBeam.co — SEO & AI Search Intelligence</div>
 
     <div class="coffee-wrap">
-      <a href="https://buymeacoffee.com" target="_blank" rel="noopener noreferrer" class="coffee-btn">
-        <span class="coffee-icon">☕</span>
-        <span class="coffee-text" data-i18n="coffee-text">Buy me a coffee</span>
+      <a href="https://www.linkedin.com/in/korkmazbaris/" target="_blank" rel="noopener noreferrer" class="coffee-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+          <rect x="2" y="9" width="4" height="12"/>
+          <circle cx="4" cy="4" r="2"/>
+        </svg>
+        <span class="coffee-text" data-i18n="contact-text">Get in Touch</span>
       </a>
-      <div class="coffee-sub" data-i18n="coffee-sub">If SearchBeam saves you time, a coffee means a lot ✌️</div>
+      <div class="coffee-sub" data-i18n="contact-sub">Have feedback or ideas? Let's connect ✌️</div>
     </div>
 
     <div class="footer-text"><span data-i18n="footer-right">Built for the SEO community</span> · <a href="#" data-i18n="footer-submit">Submit a Source</a></div>
@@ -724,8 +791,8 @@ const TRANSLATIONS = {
     'footer-left':    'SearchBeam.co — SEO & AI Search Intelligence',
     'footer-right':   'Built for the SEO community',
     'footer-submit':  'Submit a Source',
-    'coffee-text':    'Buy me a coffee',
-    'coffee-sub':     'If SearchBeam saves you time, a coffee means a lot ✌️',
+    'contact-text':   'Get in Touch',
+    'contact-sub':    'Have feedback or ideas? Let's connect ✌️',
     'ticker1': 'Google AI Overviews expanding to new markets',
     'ticker2': 'Anthropic releases new models with extended thinking',
     'ticker3': 'Search Engine Journal: GEO becomes standard practice',
@@ -758,8 +825,8 @@ const TRANSLATIONS = {
     'footer-left':    'SearchBeam.co — SEO & YZ Arama İstihbaratı',
     'footer-right':   'SEO camiası için yapıldı',
     'footer-submit':  'Kaynak Öner',
-    'coffee-text':    'Bir kahve ısmarla',
-    'coffee-sub':     'SearchBeam işine yarıyorsa, bir kahve çok şey ifade eder ✌️',
+    'contact-text':   'İletişime Geç',
+    'contact-sub':    'Geri bildirim veya fikirleriniz var mı? Konuşalım ✌️',
     'ticker1': 'Google AI Overviews yeni pazarlara genişliyor',
     'ticker2': 'Anthropic, gelişmiş düşünme özelliğiyle yeni modeller yayınladı',
     'ticker3': 'Search Engine Journal: GEO artık standart bir uygulama',
